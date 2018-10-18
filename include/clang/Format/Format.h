@@ -1234,7 +1234,9 @@ struct FormatStyle {
     LK_TableGen,
     /// Should be used for Protocol Buffer messages in text format
     /// (https://developers.google.com/protocol-buffers/).
-    LK_TextProto
+    LK_TextProto,
+    /// Should be used for HaXe code.
+    LK_HaXe
   };
   bool isCpp() const { return Language == LK_Cpp || Language == LK_ObjC; }
 
@@ -2062,6 +2064,8 @@ inline StringRef getLanguageName(FormatStyle::LanguageKind Language) {
     return "Proto";
   case FormatStyle::LK_TextProto:
     return "TextProto";
+  case FormatStyle::LK_HaXe:
+    return "HaXe";
   default:
     return "Unknown";
   }

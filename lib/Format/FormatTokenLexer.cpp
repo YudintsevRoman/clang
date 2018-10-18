@@ -47,7 +47,7 @@ ArrayRef<FormatToken *> FormatTokenLexer::lex() {
   assert(FirstInLineIndex == 0);
   do {
     Tokens.push_back(getNextToken());
-    if (Style.Language == FormatStyle::LK_JavaScript) {
+    if (Style.Language == FormatStyle::LK_JavaScript || Style.Language == FormatStyle::LK_HaXe) {
       tryParseJSRegexLiteral();
       handleTemplateStrings();
     }
@@ -70,7 +70,7 @@ void FormatTokenLexer::tryMergePreviousTokens() {
   if (tryMergeNSStringLiteral())
     return;
 
-  if (Style.Language == FormatStyle::LK_JavaScript) {
+  if (Style.Language == FormatStyle::LK_JavaScript || Style.Language == FormatStyle::LK_HaXe) {
     static const tok::TokenKind JSIdentity[] = {tok::equalequal, tok::equal};
     static const tok::TokenKind JSNotIdentity[] = {tok::exclaimequal,
                                                    tok::equal};
@@ -554,7 +554,8 @@ FormatToken *FormatTokenLexer::getNextToken() {
   // the comment token at the backslash, and resets the lexer to restart behind
   // the backslash.
   if ((Style.Language == FormatStyle::LK_JavaScript ||
-       Style.Language == FormatStyle::LK_Java) &&
+       Style.Language == FormatStyle::LK_Java ||
+       Style.Language == FormatStyle::LK_HaXe) &&
       FormatTok->is(tok::comment) && FormatTok->TokenText.startswith("//")) {
     size_t BackslashPos = FormatTok->TokenText.find('\\');
     while (BackslashPos != StringRef::npos) {
@@ -615,7 +616,7 @@ FormatToken *FormatTokenLexer::getNextToken() {
                            tok::kw_operator)) {
       FormatTok->Tok.setKind(tok::identifier);
       FormatTok->Tok.setIdentifierInfo(nullptr);
-    } else if (Style.Language == FormatStyle::LK_JavaScript &&
+    } else if ((Style.Language == FormatStyle::LK_JavaScript || Style.Language == FormatStyle::LK_HaXe) &&
                FormatTok->isOneOf(tok::kw_struct, tok::kw_union,
                                   tok::kw_operator)) {
       FormatTok->Tok.setKind(tok::identifier);
@@ -686,7 +687,7 @@ void FormatTokenLexer::readRawToken(FormatToken &Tok) {
     if (!Tok.TokenText.empty() && Tok.TokenText[0] == '"') {
       Tok.Tok.setKind(tok::string_literal);
       Tok.IsUnterminatedLiteral = true;
-    } else if (Style.Language == FormatStyle::LK_JavaScript &&
+    } else if ((Style.Language == FormatStyle::LK_JavaScript || Style.Language == FormatStyle::LK_HaXe) &&
                Tok.TokenText == "''") {
       Tok.Tok.setKind(tok::string_literal);
     }
@@ -694,7 +695,8 @@ void FormatTokenLexer::readRawToken(FormatToken &Tok) {
 
   if ((Style.Language == FormatStyle::LK_JavaScript ||
        Style.Language == FormatStyle::LK_Proto ||
-       Style.Language == FormatStyle::LK_TextProto) &&
+       Style.Language == FormatStyle::LK_TextProto ||
+       Style.Language == FormatStyle::LK_HaXe) &&
       Tok.is(tok::char_constant)) {
     Tok.Tok.setKind(tok::string_literal);
   }

@@ -1490,6 +1490,10 @@ the configuration (without a prefix: ``Auto``).
     Should be used for Protocol Buffer messages in text format
     (https://developers.google.com/protocol-buffers/).
 
+  * ``LK_HaXe`` (in configuration: ``HaXe``)
+    Should be used for HaXe code
+    (https://haxe.org/).
+
 
 
 **MacroBlockBegin** (``std::string``)

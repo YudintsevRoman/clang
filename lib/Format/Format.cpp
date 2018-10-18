@@ -62,6 +62,7 @@ template <> struct ScalarEnumerationTraits<FormatStyle::LanguageKind> {
     IO.enumCase(Value, "Proto", FormatStyle::LK_Proto);
     IO.enumCase(Value, "TableGen", FormatStyle::LK_TableGen);
     IO.enumCase(Value, "TextProto", FormatStyle::LK_TextProto);
+    IO.enumCase(Value, "HaXe", FormatStyle::LK_HaXe);
   }
 };
 
@@ -789,7 +790,7 @@ FormatStyle getGoogleStyle(FormatStyle::LanguageKind Language) {
           },
           /*CanonicalDelimiter=*/"",
           /*BasedOnStyle=*/"google",
-      },
+      }
   };
   GoogleStyle.SpacesBeforeTrailingComments = 2;
   GoogleStyle.Standard = FormatStyle::LS_Auto;
@@ -940,6 +941,16 @@ FormatStyle getGNUStyle() {
   return Style;
 }
 
+FormatStyle getPlaytikaStyle(FormatStyle::LanguageKind Language) {
+  FormatStyle VDSStyle = getLLVMStyle();
+  if (Language == FormatStyle::LK_HaXe) {
+    //VDSStyle.ColumnLimit = 150;
+    //VDSStyle.BraceWrapping.BeforeCatch = true;
+    //VDSStyle.BraceWrapping.BeforeElse = true;
+  }
+  return VDSStyle;
+}
+
 FormatStyle getNoStyle() {
   FormatStyle NoStyle = getLLVMStyle();
   NoStyle.DisableFormat = true;
@@ -962,6 +973,8 @@ bool getPredefinedStyle(StringRef Name, FormatStyle::LanguageKind Language,
     *Style = getWebKitStyle();
   } else if (Name.equals_lower("gnu")) {
     *Style = getGNUStyle();
+  } else if (Name.equals_lower("playtika")) {
+     *Style = getPlaytikaStyle(Language);
   } else if (Name.equals_lower("none")) {
     *Style = getNoStyle();
   } else {
@@ -2148,7 +2161,7 @@ reformat(const FormatStyle &Style, StringRef Code,
     return {tooling::Replacements(), 0};
   if (isLikelyXml(Code))
     return {tooling::Replacements(), 0};
-  if (Expanded.Language == FormatStyle::LK_JavaScript && isMpegTS(Code))
+  if ((Expanded.Language == FormatStyle::LK_JavaScript || Style.Language == FormatStyle::LK_HaXe) && isMpegTS(Code))
     return {tooling::Replacements(), 0};
 
   typedef std::function<std::pair<tooling::Replacements, unsigned>(
@@ -2299,6 +2312,8 @@ static FormatStyle::LanguageKind getLanguageByFileName(StringRef FileName) {
     return FormatStyle::LK_TextProto;
   if (FileName.endswith_lower(".td"))
     return FormatStyle::LK_TableGen;
+  if (FileName.endswith_lower(".hx"))
+      return FormatStyle::LK_HaXe;
   return FormatStyle::LK_Cpp;
 }
 

@@ -403,7 +403,7 @@ bool ContinuationIndenter::mustBreak(const LineState &State) {
       //   }.bind(...));
       // FIXME: We should find a more generic solution to this problem.
       !(State.Column <= NewLineColumn &&
-        Style.Language == FormatStyle::LK_JavaScript) &&
+        (Style.Language == FormatStyle::LK_JavaScript || Style.Language == FormatStyle::LK_HaXe)) &&
       !(Previous.closesScopeAfterBlock() &&
         State.Column <= NewLineColumn))
     return true;
@@ -1335,7 +1335,7 @@ void ContinuationIndenter::moveStatePastScopeOpener(LineState &State,
         (State.Line->Type == LT_ObjCDecl && ObjCBinPackProtocolList);
 
     AvoidBinPacking =
-        (Style.Language == FormatStyle::LK_JavaScript && EndsInComma) ||
+        ((Style.Language == FormatStyle::LK_JavaScript || Style.Language == FormatStyle::LK_HaXe) && EndsInComma) ||
         (State.Line->MustBeDeclaration && !BinPackDeclaration) ||
         (!State.Line->MustBeDeclaration && !Style.BinPackArguments) ||
         (Style.ExperimentalAutoDetectBinPacking &&
@@ -1364,7 +1364,7 @@ void ContinuationIndenter::moveStatePastScopeOpener(LineState &State,
       }
     }
 
-    if (Style.Language == FormatStyle::LK_JavaScript && EndsInComma)
+    if ((Style.Language == FormatStyle::LK_JavaScript || Style.Language == FormatStyle::LK_HaXe) && EndsInComma)
       BreakBeforeParameter = true;
   }
   // Generally inherit NoLineBreak from the current scope to nested scope.
@@ -1695,6 +1695,7 @@ std::unique_ptr<BreakableToken> ContinuationIndenter::createBreakableToken(
     // it requires strings to be merged using "+" which we don't support.
     if (Style.Language == FormatStyle::LK_Java ||
         Style.Language == FormatStyle::LK_JavaScript ||
+        Style.Language == FormatStyle::LK_HaXe ||
         !Style.BreakStringLiterals ||
         !AllowBreak)
       return nullptr;

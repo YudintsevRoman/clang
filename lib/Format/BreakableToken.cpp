@@ -99,7 +99,7 @@ static BreakableToken::Split getCommentSplit(StringRef Text,
     // In JavaScript, some @tags can be followed by {, and machinery that parses
     // these comments will fail to understand the comment if followed by a line
     // break. So avoid ever breaking before a {.
-    else if (Style.Language == FormatStyle::LK_JavaScript &&
+    else if ((Style.Language == FormatStyle::LK_JavaScript || Style.Language == FormatStyle::LK_HaXe) &&
              SpaceOffset + 1 < Text.size() && Text[SpaceOffset + 1] == '{')
       SpaceOffset = Text.find_last_of(Blanks, SpaceOffset);
     else
@@ -426,7 +426,8 @@ BreakableBlockComment::BreakableBlockComment(
 
   // Detect a multiline jsdoc comment and set DelimitersOnNewline in that case.
   if (Style.Language == FormatStyle::LK_JavaScript ||
-      Style.Language == FormatStyle::LK_Java) {
+      Style.Language == FormatStyle::LK_Java ||
+      Style.Language == FormatStyle::LK_HaXe) {
     if ((Lines[0] == "*" || Lines[0].startswith("* ")) && Lines.size() > 1) {
       // This is a multiline jsdoc comment.
       DelimitersOnNewline = true;
