@@ -636,11 +636,17 @@ static bool ShouldBreakBeforeBrace(const FormatStyle &Style,
   return false;
 }
 
+void UnwrappedLineParser::parseReturnBlock() {
+  while(!FormatTok->Tok.isOneOf(tok::l_brace, tok::semi)) {
+    nextToken();
+  }
+}
+
 void UnwrappedLineParser::parseChildBlock() {
   FormatTok->BlockKind = BK_Block;
   nextToken();
   {
-    bool SkipIndent = ((Style.Language == FormatStyle::LK_JavaScript || Style.Language == FormatStyle::LK_HaXe) &&
+    bool SkipIndent = ((Style.Language == FormatStyle::LK_JavaScript) &&
                        (isGoogScope(*Line) || isIIFE(*Line, Keywords)));
     ScopedLineState LineState(*this);
     ScopedDeclarationState DeclarationState(*Line, DeclarationScopeStack,
@@ -1516,7 +1522,7 @@ bool UnwrappedLineParser::parseBracedList(bool ContinueOnSemicolons,
   // FIXME: Once we have an expression parser in the UnwrappedLineParser,
   // replace this by using parseAssigmentExpression() inside.
   do {
-    if (Style.Language == FormatStyle::LK_JavaScript || Style.Language == FormatStyle::LK_HaXe) {
+    if (Style.Language == FormatStyle::LK_JavaScript) {
       if (FormatTok->is(Keywords.kw_function) ||
           FormatTok->startsSequence(Keywords.kw_async, Keywords.kw_function)) {
         tryToParseJSFunction();
@@ -1615,6 +1621,9 @@ void UnwrappedLineParser::parseParens() {
       break;
     case tok::r_paren:
       nextToken();
+      if (Style.Language == FormatStyle::LK_HaXe && FormatTok->is(tok::colon)) {
+  	    parseReturnBlock();
+      }
       return;
     case tok::r_brace:
       // A "}" inside parenthesis is an error if there wasn't a matching "{".
@@ -1640,7 +1649,7 @@ void UnwrappedLineParser::parseParens() {
         nextToken();
       break;
     case tok::identifier:
-      if ((Style.Language == FormatStyle::LK_JavaScript || Style.Language == FormatStyle::LK_HaXe) &&
+      if (Style.Language == FormatStyle::LK_JavaScript &&
           (FormatTok->is(Keywords.kw_function) ||
            FormatTok->startsSequence(Keywords.kw_async, Keywords.kw_function)))
         tryToParseJSFunction();
