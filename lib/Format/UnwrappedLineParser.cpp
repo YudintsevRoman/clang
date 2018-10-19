@@ -343,8 +343,12 @@ void UnwrappedLineParser::parseLevel(bool HasOpeningBrace) {
       addUnwrappedLine();
       break;
     case tok::r_brace:
-      if (HasOpeningBrace)
+      if (HasOpeningBrace) {
+        //if ( Style.Language == FormatStyle::LK_HaXe && FormatTok->) {
+
+        //}
         return;
+      }
       nextToken();
       addUnwrappedLine();
       break;
@@ -646,7 +650,7 @@ void UnwrappedLineParser::parseChildBlock() {
   FormatTok->BlockKind = BK_Block;
   nextToken();
   {
-    bool SkipIndent = ((Style.Language == FormatStyle::LK_JavaScript) &&
+    bool SkipIndent = ((Style.Language == FormatStyle::LK_JavaScript || Style.Language == FormatStyle::LK_HaXe) &&
                        (isGoogScope(*Line) || isIIFE(*Line, Keywords)));
     ScopedLineState LineState(*this);
     ScopedDeclarationState DeclarationState(*Line, DeclarationScopeStack,
@@ -1007,8 +1011,9 @@ void UnwrappedLineParser::parseStructuralElement() {
   case tok::kw_private:
     if (Style.Language == FormatStyle::LK_Java ||
         Style.Language == FormatStyle::LK_JavaScript ||
-        Style.Language == FormatStyle::LK_HaXe)
+        Style.Language == FormatStyle::LK_HaXe) {
       nextToken();
+    }
     else
       parseAccessSpecifier();
     return;
@@ -1297,13 +1302,37 @@ void UnwrappedLineParser::parseStructuralElement() {
       // expressions (functions that are not on their own line) must not create
       // a new unwrapped line, so they are special cased below.
       size_t TokenCount = Line->Tokens.size();
-      if ((Style.Language == FormatStyle::LK_JavaScript || Style.Language == FormatStyle::LK_HaXe) &&
+      if (Style.Language == FormatStyle::LK_JavaScript &&
           FormatTok->is(Keywords.kw_function) &&
           (TokenCount > 1 || (TokenCount == 1 && !Line->Tokens.front().Tok->is(
                                                      Keywords.kw_async)))) {
         tryToParseJSFunction();
         break;
       }
+      if (Style.Language == FormatStyle::LK_HaXe &&
+                FormatTok->is(Keywords.kw_function) &&
+                Line->MustBeDeclaration &&
+				FormatTok->NewlinesBefore <= 1)
+		{
+
+		  //Line->Level++;
+		  if (Line->Tokens.size() > 0) {
+		    Line->Tokens.begin()->Tok->MustBreakBefore = true;
+		    Line->Tokens.begin()->Tok->NewlinesBefore = 2;
+		  } else {
+		    FormatTok->MustBreakBefore = true;
+		    FormatTok->NewlinesBefore = 2;
+		  }
+		  //addUnwrappedLine();
+		  //Line->Tokens.begin()->Tok->MustBreakBefore = true;
+		  //FormatToken TempToken;
+		  //TempToken.startToken();
+          //TempToken.setKind(tok::breakerlinen);
+
+		  //MustBreakBeforeNextToken = true;
+		  nextToken();
+		  break;
+        }
       if ((Style.Language == FormatStyle::LK_JavaScript ||
            Style.Language == FormatStyle::LK_Java ||
            Style.Language == FormatStyle::LK_HaXe) &&
@@ -1621,9 +1650,9 @@ void UnwrappedLineParser::parseParens() {
       break;
     case tok::r_paren:
       nextToken();
-      if (Style.Language == FormatStyle::LK_HaXe && FormatTok->is(tok::colon)) {
-  	    parseReturnBlock();
-      }
+      //if (Style.Language == FormatStyle::LK_HaXe && FormatTok->is(tok::colon)) {
+  	    //parseReturnBlock();
+      //}
       return;
     case tok::r_brace:
       // A "}" inside parenthesis is an error if there wasn't a matching "{".
@@ -1649,10 +1678,13 @@ void UnwrappedLineParser::parseParens() {
         nextToken();
       break;
     case tok::identifier:
-      if (Style.Language == FormatStyle::LK_JavaScript &&
+      if ((Style.Language == FormatStyle::LK_JavaScript || Style.Language == FormatStyle::LK_HaXe) &&
           (FormatTok->is(Keywords.kw_function) ||
            FormatTok->startsSequence(Keywords.kw_async, Keywords.kw_function)))
         tryToParseJSFunction();
+      //else if (Style.Language == FormatStyle::LK_HaXe && FormatTok->NewlinesBefore == 0) {
+		//++Line->Level;
+      //}
       else
         nextToken();
       break;

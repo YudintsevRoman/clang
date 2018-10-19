@@ -214,6 +214,9 @@ PUNCTUATOR(hash,                "#")
 PUNCTUATOR(hashhash,            "##")
 PUNCTUATOR(hashat,              "#@")
 
+//PUNCTUATOR(breakerlinen,        "\n")
+//PUNCTUATOR(breakerliner,        "\r")
+
 // C++ Support
 PUNCTUATOR(periodstar,          ".*")
 PUNCTUATOR(arrowstar,           "->*")

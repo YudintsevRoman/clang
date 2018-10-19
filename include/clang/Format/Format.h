@@ -609,6 +609,8 @@ struct FormatStyle {
     ///   enum X : int { A, B };
     /// \endcode
     BS_WebKit,
+    /// for playtika vds
+    BS_VDS,
     /// Configure each individual brace in `BraceWrapping`.
     BS_Custom
   };

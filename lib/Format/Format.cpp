@@ -614,6 +614,10 @@ static FormatStyle expandPresets(const FormatStyle &Style) {
   case FormatStyle::BS_WebKit:
     Expanded.BraceWrapping.AfterFunction = true;
     break;
+  case FormatStyle::BS_VDS:
+    Expanded.BraceWrapping.BeforeCatch = true;
+    Expanded.BraceWrapping.BeforeElse = true;
+    break;
   default:
     break;
   }
@@ -943,10 +947,17 @@ FormatStyle getGNUStyle() {
 
 FormatStyle getPlaytikaStyle(FormatStyle::LanguageKind Language) {
   FormatStyle VDSStyle = getLLVMStyle();
+  VDSStyle.BinPackParameters = false;
+  VDSStyle.BinPackArguments = false;
+  VDSStyle.AllowAllParametersOfDeclarationOnNextLine = false;
+  VDSStyle.ColumnLimit = 100;
+  VDSStyle.IndentWidth = 4;
+  VDSStyle.TabWidth = 4;
+  VDSStyle.UseTab = FormatStyle::UT_Always;
   if (Language == FormatStyle::LK_HaXe) {
-    //VDSStyle.ColumnLimit = 150;
-    //VDSStyle.BraceWrapping.BeforeCatch = true;
-    //VDSStyle.BraceWrapping.BeforeElse = true;
+    VDSStyle.BreakBeforeBraces = FormatStyle::BS_VDS;
+    VDSStyle.AllowShortFunctionsOnASingleLine = FormatStyle::SFS_Empty;
+    VDSStyle.AlignAfterOpenBracket = FormatStyle::BAS_Align;
   }
   return VDSStyle;
 }
